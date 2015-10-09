@@ -6,9 +6,11 @@
 
 Config::Config(){
     m_nPort = 0;
+    m_nMaxProcessorCnt = 1;
     m_nKaveProcessCnt = 0;
     m_nKaveThreadCnt = 0;
     m_nTaskQueueSize = 0;
+    m_whiteListType = 0;
     memset(m_WhiteListPath,0,512);
     memset(m_LicensePath,0,512);
     memset(m_TmpPath,0,512);
@@ -25,7 +27,7 @@ Config::Config(const Config &){
     
 }
 
-int Config::Load(char* path){
+int Config::Load(const char* path){
     FILE* fp = fopen(path,"r");
     if(fp == NULL){
         return 1;
@@ -35,9 +37,14 @@ int Config::Load(char* path){
     char key[32] = {0};
     char value[READ_BUFFER_SIZE] = {0};
     while(fgets(temp,READ_BUFFER_SIZE,fp) != NULL){
-        sscanf(temp,"%s=%s",key,value);
+        sscanf(temp,"%[^=]=%s",key,value);
         if(!strcmp(key,"PORT")){
             m_nPort = atoi(value);
+        }else if(!strcmp(key,"WHITELIST_TYPE")){
+            if(NULL != strstr(value,"KAVE_WHITE_LIST"))
+                m_whiteListType |= KAVE_WHITE_LIST;
+            if(NULL != strstr(value,"BIGDATA_WHITE_LIST"))
+                m_whiteListType |= BIGDATA_WHITE_LIST;
         }else if(!strcmp(key,"LOG_PATH")){
             strcpy(m_BasesPath,value);
         }else if(!strcmp(key,"BASES_PATH")){
@@ -66,6 +73,10 @@ int Config::Load(char* path){
 
 int Config::GetPort(){
     return m_nPort;
+}
+
+int Config::GetMaxProcessorCnt(){
+    return m_nMaxProcessorCnt;
 }
 
 int Config::GetKaveProcessCnt(){
@@ -102,4 +113,8 @@ char* Config::GetBasesPath(){
 
 char* Config::GetLogPath(){
     return m_LogPath;
+}
+
+WHITE_LIST_TYPE Config::GetWhiteListType(){
+    return m_whiteListType;
 }

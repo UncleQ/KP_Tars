@@ -1,7 +1,7 @@
 #include "TaskQueueManager.h"
 #include <cstring>
 
-TaskQueueManager::TaskQueueManager(){
+CTaskQueueManager::CTaskQueueManager(){
     m_pTaskBuffer = NULL;
     m_nCurCnt = 0;
     m_nStart = 0;
@@ -9,19 +9,19 @@ TaskQueueManager::TaskQueueManager(){
     m_SizeOfTaskObject = sizeof(TaskObject);
 }
 
-TaskQueueManager::~TaskQueueManager(){
+CTaskQueueManager::~CTaskQueueManager(){
 	pthread_mutex_destroy(&m_mutex);
     if(m_pTaskBuffer != NULL)
         delete[] m_pTaskBuffer;
 }
 
-void TaskQueueManager::Init(int size){
+void CTaskQueueManager::Init(int size){
     m_nSize = size;
     m_pTaskBuffer = new TaskObject[m_nSize];
     pthread_mutex_init(&m_mutex,NULL);  
 }
 
-int TaskQueueManager::ReSize(UInt32 nSize){
+int CTaskQueueManager::ReSize(UInt32 nSize){
     pthread_mutex_lock(&m_mutex);  
     if(nSize <= m_nSize){
         pthread_mutex_unlock(&m_mutex);  
@@ -45,7 +45,7 @@ int TaskQueueManager::ReSize(UInt32 nSize){
     return 0;
 }
 
-int TaskQueueManager::PushTask(TaskObject* taskPos, UInt32 nSize){
+int CTaskQueueManager::PushTask(TaskObject* taskPos, UInt32 nSize){
     pthread_mutex_lock(&m_mutex); 
     if(nSize > m_nSize - m_nCurCnt){
         pthread_mutex_unlock(&m_mutex);
@@ -65,7 +65,7 @@ int TaskQueueManager::PushTask(TaskObject* taskPos, UInt32 nSize){
     return 0;
 }
 
-int TaskQueueManager::GetTask(TaskObject* taskPos,UInt32 nSize){
+int CTaskQueueManager::GetTask(TaskObject* taskPos,UInt32 nSize){
     pthread_mutex_lock(&m_mutex);
     if(nSize > m_nCurCnt)
         nSize = m_nCurCnt;
@@ -85,6 +85,6 @@ int TaskQueueManager::GetTask(TaskObject* taskPos,UInt32 nSize){
     return nSize;
 }
 
-int TaskQueueManager::GetCount(){
+int CTaskQueueManager::GetCount(){
     return m_nCurCnt;
 }

@@ -12,13 +12,10 @@
 
 #include <vector>
 
-#include "TaskQueueManager.h"
-
-class SSLConnector{
+class CSSLConnector{
 private:
     int                     m_port;
     pthread_t               m_handle;
-    TaskQueueManager*       m_pTaskQueueManager;
     SSL_CTX*                m_server_ctx;
     
     bool                    m_started;
@@ -31,13 +28,12 @@ private:
 	unsigned				m_stack;	
 
 public:
-    SSLConnector();
-    ~SSLConnector();
+    CSSLConnector();
+    ~CSSLConnector();
     
     void SetPort(int port);
     int Run();
     int Join();
-    void BindTaskQueueManager(TaskQueueManager* obj);
     
  private:
     static void* event_loop_main(void * arg);

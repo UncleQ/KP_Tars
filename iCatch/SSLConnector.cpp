@@ -1,18 +1,19 @@
 #include "SSLConnector.h"
+#include "TaskQueueManager.h"
 
-SSLConnector::SSLConnector(){
+CSSLConnector::CSSLConnector(){
 	m_stack = 1024 * 1024 * 10;
     m_port = 443;
 }
 
-SSLConnector::~SSLConnector(){
+CSSLConnector::~CSSLConnector(){
 }
 
-void SSLConnector::SetPort(int port){
+void CSSLConnector::SetPort(int port){
     m_port = port;
 }
 
-int SSLConnector::Run(){
+int CSSLConnector::Run(){
     int errorCode = 0;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
@@ -24,8 +25,8 @@ int SSLConnector::Run(){
 		pthread_attr_destroy(&attr);
 		//T_THROW("Failed to set thread stack.");
 	}
-	errorCode = pthread_create(&m_handle,&attr,SSLConnector::event_loop_main,(void*)this);
-	//errorCode = pthread_create(&m_handle,NULL,SSLConnector::event_loop_main,(void*)this);
+	errorCode = pthread_create(&m_handle,&attr,CSSLConnector::event_loop_main,(void*)this);
+	//errorCode = pthread_create(&m_handle,NULL,CSSLConnector::event_loop_main,(void*)this);
 	pthread_attr_destroy(&attr);
 	if(!errorCode){
         m_started = true;
@@ -35,7 +36,7 @@ int SSLConnector::Run(){
     return errorCode;
 }
 
-int SSLConnector::Join(){
+int CSSLConnector::Join(){
     if(m_started != true){
         //thread not started
         return 0;
@@ -46,20 +47,16 @@ int SSLConnector::Join(){
     return err;
 }
 
-void SSLConnector::BindTaskQueueManager(TaskQueueManager* obj){
-    m_pTaskQueueManager = obj;
-}
-
-void* SSLConnector::event_loop_main(void * arg){
+void* CSSLConnector::event_loop_main(void * arg){
     if(arg == NULL){
         return NULL;
     }
     
-    SSLConnector* sslConnector = (SSLConnector*)arg;
+    CSSLConnector* sslConnector = (CSSLConnector*)arg;
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(m_port);
+    sin.sin_port = htons(sslConnector->m_port);
     sin.sin_addr.s_addr = htonl(0x7f000001); /* 127.0.0.1 */
 
     /* Initialize the OpenSSL library */
@@ -97,8 +94,8 @@ void* SSLConnector::event_loop_main(void * arg){
     return NULL;
 }
 
-void SSLConnector::ssl_acceptcb(struct evconnlistener *serv, int sock, struct sockaddr *sa, int sa_len, void *arg){
-    SSLConnector* sslConnector = (SSLConnector*)arg;
+void CSSLConnector::ssl_acceptcb(struct evconnlistener *serv, int sock, struct sockaddr *sa, int sa_len, void *arg){
+    CSSLConnector* sslConnector = (CSSLConnector*)arg;
     //struct event_base *evbase;
     struct bufferevent *bev;
     SSL_CTX *server_ctx;
@@ -117,11 +114,11 @@ void SSLConnector::ssl_acceptcb(struct evconnlistener *serv, int sock, struct so
     sslConnector->m_vBufferevent.push_back(bev);
 }
 
-void SSLConnector::ssl_readcb(struct bufferevent * bev, void * arg){
+void CSSLConnector::ssl_readcb(struct bufferevent * bev, void * arg){
     
 }
 
-void SSLConnector::event_cb(struct bufferevent *bev, short event, void *arg){  
+void CSSLConnector::event_cb(struct bufferevent *bev, short event, void *arg){  
     evutil_socket_t fd = bufferevent_getfd(bev);  
     printf("fd = %u, ", fd);  
     if (event & BEV_EVENT_TIMEOUT) {  

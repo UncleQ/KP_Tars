@@ -1,17 +1,18 @@
-#ifndef JSON_ADAPER_H
-#define JSON_ADAPER_H
+#ifndef _JSON_ADAPTER_H
+#define _JSON_ADAPTER_H
 
 #include "rapidjson/document.h"
 #include "MessageDefine.h"
 
 using namespace rapidjson;
 
-class JSONAdaper{
+class CJSONAdapter{
 public:
-    JSONAdaper();
-    ~JSONAdaper();
+    CJSONAdapter();
+    ~CJSONAdapter();
     
     int ParseJSON(char * cJSON);
+    inline MessageType GetMessageType(){return m_type;}
     
 private:
     int ParseScanFileArray(const Value& array);

@@ -1,10 +1,12 @@
 #ifndef _MESSAGE_DEFINE_H_
 #define _MESSAGE_DEFINE_H_
 
-enum Num{
+#include "Util/PlatForm.h"
+
+enum MessageType{
     HOST_INFO=0,
     SCAN_FILE
-}MessageType;
+};
 
 typedef struct{
     int size;
@@ -81,7 +83,8 @@ typedef struct{
     int entropy;
 }MessageAutorunBinary;
 
-typedef struct MessageProcessScanModule{
+typedef struct{
+	struct MessageProcessScanModule;
     int size;
     int type;
     long timeStamp;
@@ -91,7 +94,7 @@ typedef struct MessageProcessScanModule{
     char startTime[64];
     int parentID;
     int parentCmd;
-    MessageProcessScanModule childList[];
+    //MessageProcessScanModule childList[];
     bool isSigned;
     char signer;
     int userID;
@@ -109,7 +112,6 @@ typedef struct{
 }MessageScheduleTask;
 
 typedef struct{
-    int size;
     int type;
     long timeStamp;
     char name[64];

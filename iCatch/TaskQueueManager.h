@@ -6,14 +6,20 @@
 #define DEFAULT_BUFFER_SIZE 1024
 
 typedef struct TaskObject{
-    int type;
-    UInt32 md5;
+    UInt32 size;
+    char* buffer;
 }TaskObject;
 
-class TaskQueueManager{
+class CTaskQueueManager{
+private:
+    CTaskQueueManager();
+    ~CTaskQueueManager();
+    
 public:
-    TaskQueueManager();
-    ~TaskQueueManager();
+    static CTaskQueueManager & GetInstance(){
+        static CTaskQueueManager instance;   //局部静态变量  
+        return instance;  
+    }
     
     void Init(int size = DEFAULT_BUFFER_SIZE);
     int ReSize(UInt32 nSize);

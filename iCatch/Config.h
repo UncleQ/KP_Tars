@@ -1,6 +1,12 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#include "Util/PlatForm.h"
+
+#define WHITE_LIST_TYPE UInt8
+#define KAVE_WHITE_LIST 0x01
+#define BIGDATA_WHITE_LIST 0x02
+
 class Config{
 private:
     Config();
@@ -14,8 +20,9 @@ public:
         return instance;  
     }
     
-    int Load(char* path);
+    int Load(const char* path);
     int GetPort();
+    int GetMaxProcessorCnt();
     //int GetKaveMode();
     int GetKaveProcessCnt();
     int GetKaveThreadCnt();
@@ -26,9 +33,12 @@ public:
     char* GetPPLPath();
     char* GetBasesPath();
     char* GetLogPath();
+    WHITE_LIST_TYPE GetWhiteListType();
     
 private:
+    WHITE_LIST_TYPE m_whiteListType;
     int m_nPort;
+    int m_nMaxProcessorCnt;
     //int m_KaveMode;
     int m_nKaveProcessCnt;
     int m_nKaveThreadCnt;

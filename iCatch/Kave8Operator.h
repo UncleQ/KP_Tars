@@ -6,20 +6,21 @@
 #include <sdkunix/istream.h>
 #include <sdk8_unix_interface.h>
 
-class Kave8Operator{
+class CKave8Operator{
 private:
-    Kave8Operator();
-    ~Kave8Operator();
-    Kave8Operator(const Kave8Operator &);
-    Kave8Operator & operator = (const Kave8Operator &);
+    CKave8Operator();
+    ~CKave8Operator();
+    CKave8Operator(const CKave8Operator &);
+    CKave8Operator & operator = (const CKave8Operator &);
     
 public:
-    static Kave8Operator & GetInstance(){
-        static Kave8Operator instance;   //局部静态变量  
+    static CKave8Operator & GetInstance(){
+        static CKave8Operator instance;   //局部静态变量  
         return instance;  
     }
     
     int Init(char* tmpFloder, char* dataBasePath, char* lisencePath, int porcCnt, int threadCnt);
+    int ScanFile();
     
 private:
     static CALLBACK_RESULT clbk_fn ( unsigned long  dwEvent,

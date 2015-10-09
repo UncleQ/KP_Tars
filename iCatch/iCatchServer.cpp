@@ -4,31 +4,33 @@
 #include "SSLConnector.h"
 #include "WhiteListManager.h"
 #include "Kave8Operator.h"
+#include "ProcessorManager.h"
+#include "TaskQueueManager.h"
 
 int main(int argc, char **argv){
     Config & cfg = Config::GetInstance();
-    if(cfg.Load("./config"")){
+    if(cfg.Load("./config")){
         printf("Load config err!");
         return 1;
     }
     
-	TaskQueueManager taskQueueManager;
-    taskQueueManager.Init(cfg.GetTaskQueueSize());
+	CTaskQueueManager::GetInstance().Init(cfg.GetTaskQueueSize());
     
-	WhiteListManager whiteListManager;
+	CWhiteListManager::GetInstance().LoadData(cfg.GetWhiteListType());
     
-    SSLConnector sslConnector;
-	sslConnector.BindTaskQueueManager(&taskQueueManager);
+    CProcessorManager::GetInstance().Init(cfg.GetMaxProcessorCnt());
+    
+    CSSLConnector sslConnector;
     sslConnector.SetPort(cfg.GetPort());
     
-	Kave8Operator::GetInstance().Init(cfg.GetTmpPath(),cfg.GetBasesPath(),cfg.GetLicensePath(),
+	CKave8Operator::GetInstance().Init(cfg.GetTmpPath(),cfg.GetBasesPath(),cfg.GetLicensePath(),
                                         cfg.GetKaveProcessCnt(),cfg.GetKaveThreadCnt());
     
     if(sslConnector.Run()){
-        //return 1;
+        return 1;
     }
-		while(1){
-			usleep(1000 * 10);
-		}
+	while(1){
+		usleep(1000 * 10);
+	}
 	return 1;
 }

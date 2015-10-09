@@ -1,17 +1,17 @@
 #include "Kave8Operator.h"
 
-Kave8Operator::Kave8Operator(){
+CKave8Operator::CKave8Operator(){
     
 }
 
-Kave8Operator::~Kave8Operator(){
+CKave8Operator::~CKave8Operator(){
 }
 
-Kave8Operator::Kave8Operator(const Kave8Operator &){
+CKave8Operator::CKave8Operator(const CKave8Operator &){
     
 }
 
-CALLBACK_RESULT Kave8Operator::clbk_fn ( unsigned long  dwEvent,
+CALLBACK_RESULT CKave8Operator::clbk_fn ( unsigned long  dwEvent,
         unsigned long  dwParam1,
         unsigned long  dwParam2,
         const char     *pObjectName,
@@ -22,7 +22,7 @@ CALLBACK_RESULT Kave8Operator::clbk_fn ( unsigned long  dwEvent,
             return CLBK_OK;
 }
 
-int Kave8Operator::Init(char* tmpFloder, char* dataBasePath, char* lisencePath, int porcCnt, int threadCnt){
+int CKave8Operator::Init(char* tmpFloder, char* dataBasePath, char* lisencePath, int porcCnt, int threadCnt){
     if(m_isInit)
         return 0;
     
@@ -53,5 +53,9 @@ int Kave8Operator::Init(char* tmpFloder, char* dataBasePath, char* lisencePath, 
     }
     printf("Initialization OK!\n");
     m_isInit = true;
+    return 0;
+}
+
+int CKave8Operator::ScanFile(){
     return 0;
 }
