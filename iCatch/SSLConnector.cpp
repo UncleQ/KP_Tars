@@ -21,11 +21,11 @@ int CSSLConnector::Run(){
 		pthread_attr_destroy(&attr);
 		//T_THROW("Failed to set thread detached.");
 	}
-	if(m_stack > 0 && pthread_attr_setstacksize(&attr ,m_stack)){
+	if(m_stack > 0 && pthread_attr_setstacksize(&attr, m_stack)){
 		pthread_attr_destroy(&attr);
 		//T_THROW("Failed to set thread stack.");
 	}
-	errorCode = pthread_create(&m_handle,&attr,CSSLConnector::event_loop_main,(void*)this);
+	errorCode = pthread_create(&m_handle, &attr, CSSLConnector::event_loop_main, (void*)this);
 	//errorCode = pthread_create(&m_handle,NULL,CSSLConnector::event_loop_main,(void*)this);
 	pthread_attr_destroy(&attr);
 	if(!errorCode){
@@ -41,18 +41,18 @@ int CSSLConnector::Join(){
         //thread not started
         return 0;
     }
-    int err = pthread_join(m_handle,NULL);
+    int err = pthread_join(m_handle, NULL);
     m_handle = 0;
     m_joined = true;
     return err;
 }
 
-void* CSSLConnector::event_loop_main(void * arg){
+void * CSSLConnector::event_loop_main(void * arg){
     if(arg == NULL){
         return NULL;
     }
     
-    CSSLConnector* sslConnector = (CSSLConnector*)arg;
+    CSSLConnector * sslConnector = (CSSLConnector*)arg;
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
@@ -94,12 +94,12 @@ void* CSSLConnector::event_loop_main(void * arg){
     return NULL;
 }
 
-void CSSLConnector::ssl_acceptcb(struct evconnlistener *serv, int sock, struct sockaddr *sa, int sa_len, void *arg){
-    CSSLConnector* sslConnector = (CSSLConnector*)arg;
+void CSSLConnector::ssl_acceptcb(struct evconnlistener * serv, int sock, struct sockaddr * sa, int sa_len, void * arg){
+    CSSLConnector * sslConnector = (CSSLConnector*)arg;
     //struct event_base *evbase;
-    struct bufferevent *bev;
-    SSL_CTX *server_ctx;
-    SSL *client_ctx;
+    struct bufferevent * bev;
+    SSL_CTX * server_ctx;
+    SSL * client_ctx;
 
     server_ctx = sslConnector->m_server_ctx;
     client_ctx = SSL_new(server_ctx);
@@ -115,10 +115,16 @@ void CSSLConnector::ssl_acceptcb(struct evconnlistener *serv, int sock, struct s
 }
 
 void CSSLConnector::ssl_readcb(struct bufferevent * bev, void * arg){
-    
+    TaskObject newTaskObj;
+    newTaskObj.bufferEvent = bev;
+    struct evbuffer * input = bufferevent_get_input(bev);
+    newTaskObj.size = evbuffer_get_length(input);
+    newTaskObj.buffer = new char[input_len];
+    size_t sz = bufferevent_read(bufevt, buffer, newTaskObj.size);
+    CTaskQueueManager::GetInstance().PushTask(&newTaskObj,1);
 }
 
-void CSSLConnector::event_cb(struct bufferevent *bev, short event, void *arg){  
+void CSSLConnector::event_cb(struct bufferevent * bev, short event, void * arg){  
     evutil_socket_t fd = bufferevent_getfd(bev);  
     printf("fd = %u, ", fd);  
     if (event & BEV_EVENT_TIMEOUT) {  

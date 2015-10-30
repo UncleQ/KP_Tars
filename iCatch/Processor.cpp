@@ -1,6 +1,9 @@
 #include "Processor.h"
 #include "Kave8Operator.h"
 #include "ProcessorManager.h"
+#include "WhiteListManager.h"
+
+#define MAX_SCAN_BUFFER_SIZE 1024*1024*5
 
 CProcessor::CProcessor():m_bPause(true),m_bStop(false),m_handle(0){
 	pthread_mutex_init(&m_mut,NULL);  
@@ -18,11 +21,11 @@ int CProcessor::Run(){
 		pthread_attr_destroy(&attr);
 		//T_THROW("Failed to set thread detached.");
 	}
-	if(m_stack > 0 && pthread_attr_setstacksize(&attr ,m_stack)){
+	if(m_stack > 0 && pthread_attr_setstacksize(&attr, m_stack)){
 		pthread_attr_destroy(&attr);
 		//T_THROW("Failed to set thread stack.");
 	}
-	errorCode = pthread_create(&m_handle,&attr,CProcessor::ProcessInterface,(void*)this);
+	errorCode = pthread_create(&m_handle, &attr, CProcessor::ProcessInterface, (void*)this);
 	pthread_attr_destroy(&attr);
 	if(!errorCode){
 		m_bStop = false;
@@ -51,9 +54,9 @@ void CProcessor::SetResume(){
 }
 
 void CProcessor::ReSet(){
-    TaskObject* pCurTask = NULL;
-	pthread_mutex_init(&m_mut,NULL);  
-	pthread_cond_init(&m_cond,NULL);  
+    TaskObject * pCurTask = NULL;
+	pthread_mutex_init(&m_mut, NULL);  
+	pthread_cond_init(&m_cond, NULL);  
     for(int i=0;i<m_nTaskBufferSize;i++){
         pCurTask = m_pTaskBuffer + i;
         if(pCurTask->buffer != NULL){
@@ -68,7 +71,7 @@ void CProcessor::ReSet(){
 
 int CProcessor::CheckThread(){
     int pthread_kill_err;
-    pthread_kill_err = pthread_kill(m_handle,0);
+    pthread_kill_err = pthread_kill(m_handle, 0);
 
     if(pthread_kill_err == ESRCH){
         //save err data
@@ -85,6 +88,9 @@ void* CProcessor::ProcessInterface(void * arg){
     }
     CProcessor* pProcessor = (CProcessor*)arg;
     int curSize = 0;
+    unsigned int unLen = 0;
+    unsigned int unTime = 0;
+    unsigned int unMD5 = 0;
     while(pProcessor->m_bStop){
         //pause thread
         pthread_mutex_lock(&(pProcessor->m_mut));
@@ -93,30 +99,62 @@ void* CProcessor::ProcessInterface(void * arg){
         }
         pthread_mutex_unlock(&(pProcessor->m_mut));
 
-        curSize = CTaskQueueManager::GetInstance().GetTask(pProcessor->m_pTaskBuffer,pProcessor->m_nTaskBufferSize);
+        curSize = CTaskQueueManager::GetInstance().GetTask(pProcessor->m_pTaskBuffer, pProcessor->m_nTaskBufferSize);
         CProcessorManager::GetInstance().PopTaskCallBack(CTaskQueueManager::GetInstance().GetCount());
         for(int i=0;i<curSize;i++){
-            TaskObject* pCurTask = pProcessor->m_pTaskBuffer + i;
-            char* buffer = pCurTask->buffer;
-            if((int)*buffer == 0){
+            TaskObject * pCurTask = pProcessor->m_pTaskBuffer + i;
+            char * buffer = pCurTask->buffer;
+            if(*buffer++ == 0x01){
+                //JSON Message
                 if(0 != pProcessor->m_JSONAdapter.ParseJSON(buffer + 8)){
                     //T_THROW("ParseJSON err.");
                 }
                 switch(pProcessor->m_JSONAdapter.GetMessageType()){
                     case HOST_INFO:break;
-                    case SCAN_FILE:break;
+                    case SCAN_FILE:{
+                        int nScanFile = pProcessor->m_JSONAdapter.GetScanFileCnt();
+                        MessageScanFile * pCurMessageScanFile = pProcessor->m_JSONAdapter.GetScanFileMessage();
+                        if(nScanFile == 0 || pCurMessageScanFile == NULL){
+                            //err
+                            continue;
+                        }
+                        for(int indexMessage=0;indexMessage<nScanFile;indexMessage++,pCurMessageScanFile++){
+                            WHITELIST_RESULT result = CWhiteListManager::GetInstance().CheckMD5(pCurMessageScanFile->MD5);
+                            if(result == WHITELIST_GRAY || result == WHITELIST_UNKNOW){
+                                //need upload file to scan
+                            }else if(result == WHITELIST_BAD){
+                                //alert
+                            }else
+                                continue;//ok
+                        }
+                        
+                    }break;
                     default:break;
                 }
-            }else if((int)*buffer == 0){
-                CKave8Operator::GetInstance().ScanFile();
+                //Send result
+            }else if(*buffer++ == 0x02){
+                //Scan file
+                unLen = (unsigned int)*buffer;
+                buffer += 4;
+                unMD5 = (unsigned int)*buffer;
+                buffer += 4;
+                if(unLen < MAX_SCAN_BUFFER_SIZE){
+                    CKave8Operator::GetInstance().ScanStream(buffer,unLen);
+                }else{
+                    
+                }
+                //Send result
             }
             
 			if(pCurTask->buffer){
                 delete[] pCurTask->buffer;
                 pCurTask->buffer = NULL;
+                pCurTask->bufferEvent = NULL;
                 pCurTask->size = 0;
             }
         }
+        
+        memset(pProcessor->m_pTaskBuffer, 0, pProcessor->m_nTaskBufferSize * sizeof(TaskObject));
         
         usleep(10);//10ms
     }

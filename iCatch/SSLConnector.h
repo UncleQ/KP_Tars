@@ -36,9 +36,9 @@ public:
     int Join();
     
  private:
-    static void* event_loop_main(void * arg);
+    static void * event_loop_main(void * arg);
     static void ssl_readcb(struct bufferevent * bev, void * arg);
-    static void ssl_acceptcb(struct evconnlistener *serv, int sock, struct sockaddr *sa, int sa_len, void *arg);
-    static void event_cb(struct bufferevent *bev, short event, void *arg);
+    static void ssl_acceptcb(struct evconnlistener * serv, int sock, struct sockaddr * sa, int sa_len, void * arg);
+    static void event_cb(struct bufferevent * bev, short event, void * arg);
 };
 #endif 

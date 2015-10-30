@@ -20,10 +20,10 @@ public:
     }
     
     int Init(char* tmpFloder, char* dataBasePath, char* lisencePath, int porcCnt, int threadCnt);
-    int ScanFile();
+    int ScanStream(char * buffer,unsigned int len);
     
 private:
-    static CALLBACK_RESULT clbk_fn ( unsigned long  dwEvent,
+    static CALLBACK_RESULT clbk_fn (unsigned long dwEvent,
         unsigned long  dwParam1,
         unsigned long  dwParam2,
         const char     *pObjectName,
@@ -32,13 +32,17 @@ private:
         unsigned long  dwMonitorID,
         void           *pUserContext);
         
+    static void print_hex_buf(unsigned char buf[1], unsigned long size, size_t line_len=32, size_t off_len=2);
+    static void printDetectTypeAndDanger(unsigned long  dwParam1, unsigned long  dwParam2);
+    static bool printResult(KAV_RESULT &Result);
+        
 private:
     bool m_isInit;
     int m_nProcCnt;
     int m_nThreadCnt;
-    char* m_cLisencePath[512];
-    char* m_cKeyPath[512];
-    char* m_cDataBasePath[512];
+    char * m_cLisencePath[512];
+    char * m_cKeyPath[512];
+    char * m_cDataBasePath[512];
     unsigned long m_dwScanMode;
 };
 #endif

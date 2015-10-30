@@ -11,8 +11,14 @@ typedef enum WHITELIST_RESULT{
     WHITELIST_GOOD = 0,
     WHITELIST_GRAY,
     WHITELIST_BAD,
-    WHITELIST_UNKNOW
+    WHITELIST_UNKNOW,
+	WHITELIST_ERR
 }WHITELIST_RESULT;
+
+typedef struct HashInfo{
+    UInt32 uiKey;
+    WHITELIST_RESULT value;
+}HashInfo;
 
 #define HASH_MAP_MD5 std::tr1::unordered_map < UInt32,WHITELIST_RESULT >
 #define HASH_SET_MD5 std::tr1::unordered_set < UInt32 >
@@ -22,7 +28,8 @@ typedef enum WHITELIST_RESULT{
 
 class CWhiteListManager{
 private:
-    CWhiteListManager(){}
+    CWhiteListManager();
+    ~CWhiteListManager();
     CWhiteListManager(const CWhiteListManager&){};
 
 public:
@@ -32,17 +39,28 @@ public:
     }
     
     //param1: in,MD5 value
-    //param2: in,a point for less constructor and destructor, default null
     //return: 0-good 1-bad 2-gray 3-unknow
-    WHITELIST_RESULT CheckMD5(UInt32 uiMD5,HASH_MAP_MD5_ITERATOR* pPos = NULL);
+    WHITELIST_RESULT CheckMD5(UInt32 uiMD5);
     
     //param1: in,dir
     //return: 0-ok 1-faild
-    int LoadData(const WHITE_LIST_TYPE type);//return
-    int UpdateData();
+    int Init(const char * path, int nProcessorCnt);//return
+    
+    //Change Custom Item
+    int UpdateCustomItem(HashInfo * pHashInfoBuff, int nBuffCnt);
+    int AddCustomItem(HashInfo * pHashInfoBuff, int nBuffCnt);
+    int DeleteCustomItem(HashInfo * pHashInfoBuff, int nBuffCnt);
     
 private:
-    HASH_MAP_MD5                m_HashMapMD5;
+    int LoadWhitelistFile(const char * fileName, HASH_MAP_MD5 * pHashMap);
+
+    
+private:
+    HASH_MAP_MD5                m_hashMapMD5Custom;
+    int                         m_hashMapMD5Cnt;
+    HASH_MAP_MD5 *              m_pHashMapMD5;
+    int                         m_semID;
+    int                         m_nProcessorCnt;
 };
 
 #endif

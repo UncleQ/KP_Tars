@@ -36,7 +36,7 @@ int CJSONAdapter::ParseJSON(char * cJSON){
 
 int CJSONAdapter::ParseScanFileArray(const Value& array){
     m_cntScanFile = array.Size();
-    m_scanFile = new MessageScanFile[m_cntScanFile];
+    m_pScanFile = new MessageScanFile[m_cntScanFile];
     for(int i=0;i<m_cntScanFile;i++){
         const Value& scanFile = array[i];
         const char * temp = scanFile["name"].GetString();

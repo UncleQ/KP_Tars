@@ -25,11 +25,11 @@ private:
     bool                    m_bPause;
     bool                    m_bStop;
     pthread_t               m_handle;
-    CJSONAdapter             m_JSONAdapter;
+    CJSONAdapter            m_JSONAdapter;
     int                     m_nTaskBufferSize;
     TaskObject*             m_pTaskBuffer;
     
 private:
-    static void* ProcessInterface(void * arg);
+    static void * ProcessInterface(void * arg);
 };
 #endif

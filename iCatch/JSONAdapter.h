@@ -13,6 +13,8 @@ public:
     
     int ParseJSON(char * cJSON);
     inline MessageType GetMessageType(){return m_type;}
+    inline int GetScanFileCnt(){return m_cntScanFile;}
+    inline MessageScanFile * GetScanFileMessage(){return m_pScanFile;}
     
 private:
     int ParseScanFileArray(const Value& array);
@@ -31,6 +33,6 @@ private:
     MessageAutorunBinary* m_autorunBinary;
     MessageProcessScanModule* m_processScanModule;
     MessageScheduleTask* m_scheduleTask;
-    MessageScanFile* m_scanFile;
+    MessageScanFile* m_pScanFile;
 };
 #endif

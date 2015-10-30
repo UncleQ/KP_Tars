@@ -16,7 +16,7 @@ int main(int argc, char **argv){
     
 	CTaskQueueManager::GetInstance().Init(cfg.GetTaskQueueSize());
     
-	CWhiteListManager::GetInstance().LoadData(cfg.GetWhiteListType());
+	CWhiteListManager::GetInstance().Init(cfg.GetWhiteListPath(),cfg.GetMaxProcessorCnt());
     
     CProcessorManager::GetInstance().Init(cfg.GetMaxProcessorCnt());
     

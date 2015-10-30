@@ -27,7 +27,7 @@ int CTaskQueueManager::ReSize(UInt32 nSize){
         pthread_mutex_unlock(&m_mutex);  
         return 1;
     }
-    TaskObject* pNewBuffer = new TaskObject[nSize];
+    TaskObject * pNewBuffer = new TaskObject[nSize];
     if(m_nCurCnt > 0){
         if(m_nStart > m_nEnd){
             int firstPart = m_nSize - m_nStart;
@@ -45,7 +45,7 @@ int CTaskQueueManager::ReSize(UInt32 nSize){
     return 0;
 }
 
-int CTaskQueueManager::PushTask(TaskObject* taskPos, UInt32 nSize){
+int CTaskQueueManager::PushTask(TaskObject * taskPos, UInt32 nSize){
     pthread_mutex_lock(&m_mutex); 
     if(nSize > m_nSize - m_nCurCnt){
         pthread_mutex_unlock(&m_mutex);
@@ -65,7 +65,7 @@ int CTaskQueueManager::PushTask(TaskObject* taskPos, UInt32 nSize){
     return 0;
 }
 
-int CTaskQueueManager::GetTask(TaskObject* taskPos,UInt32 nSize){
+int CTaskQueueManager::GetTask(TaskObject * taskPos, UInt32 nSize){
     pthread_mutex_lock(&m_mutex);
     if(nSize > m_nCurCnt)
         nSize = m_nCurCnt;

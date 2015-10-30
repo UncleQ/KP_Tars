@@ -7,7 +7,8 @@
 
 typedef struct TaskObject{
     UInt32 size;
-    char* buffer;
+    char * buffer;
+    void * bufferEvent;
 }TaskObject;
 
 class CTaskQueueManager{
@@ -23,8 +24,8 @@ public:
     
     void Init(int size = DEFAULT_BUFFER_SIZE);
     int ReSize(UInt32 nSize);
-    int PushTask(TaskObject* taskPos, UInt32 nSize);
-    int GetTask(TaskObject* taskPos,UInt32 nSize);
+    int PushTask(TaskObject * taskPos, UInt32 nSize);
+    int GetTask(TaskObject * taskPos, UInt32 nSize);
     int GetCount();
     
 private:
@@ -34,6 +35,6 @@ private:
     int m_nEnd;
     int m_nCurCnt;
     int m_SizeOfTaskObject;
-    TaskObject* m_pTaskBuffer;
+    TaskObject * m_pTaskBuffer;
 };
 #endif
