@@ -2,6 +2,7 @@
 #define _WHITELIST_MANAGE_H
 
 #include <tr1/unordered_map>
+#include <string>
 #include "Util/PlatForm.h"
 #include "Config.h"
 
@@ -16,14 +17,14 @@ typedef enum WHITELIST_RESULT{
 }WHITELIST_RESULT;
 
 typedef struct HashInfo{
-    UInt32 uiKey;
+    std::string strKey;
     WHITELIST_RESULT value;
 }HashInfo;
 
-#define HASH_MAP_MD5 std::tr1::unordered_map < UInt32,WHITELIST_RESULT >
-#define HASH_SET_MD5 std::tr1::unordered_set < UInt32 >
-#define HASH_MAP_MD5_ITERATOR std::tr1::unordered_map < UInt32,WHITELIST_RESULT >::iterator
-#define HASH_SET_MD5_ITERATOR std::tr1::unordered_set < UInt32 >::iterator
+#define HASH_MAP_MD5 std::tr1::unordered_map < std::string,WHITELIST_RESULT >
+#define HASH_SET_MD5 std::tr1::unordered_set < std::string >
+#define HASH_MAP_MD5_ITERATOR std::tr1::unordered_map < std::string,WHITELIST_RESULT >::iterator
+#define HASH_SET_MD5_ITERATOR std::tr1::unordered_set < std::string >::iterator
 
 
 class CWhiteListManager{
@@ -40,7 +41,9 @@ public:
     
     //param1: in,MD5 value
     //return: 0-good 1-bad 2-gray 3-unknow
-    WHITELIST_RESULT CheckMD5(UInt32 uiMD5);
+    WHITELIST_RESULT CheckMD5(std::string strMD5);
+    
+    WHITELIST_RESULT CheckMD5(char * cMD5);
     
     //param1: in,dir
     //return: 0-ok 1-faild

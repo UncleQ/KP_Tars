@@ -1,8 +1,6 @@
 #ifndef _MESSAGE_DEFINE_H_
 #define _MESSAGE_DEFINE_H_
 
-#include "Util/PlatForm.h"
-
 enum MessageType{
     HOST_INFO=0,
     SCAN_FILE
@@ -68,7 +66,7 @@ typedef struct{
     char name[64];
     char commandArgs[512];
     char SHA1;//??????????
-    UInt32 MD5;
+    char MD5[32];
     int entropy;
 }MessageServerScanInfo;
 
@@ -79,7 +77,7 @@ typedef struct{
     char registerKey[64];
     char commandArgs[512];
     char SHA1;
-    UInt32 MD5;
+    char MD5[32];
     int entropy;
 }MessageAutorunBinary;
 
@@ -99,7 +97,7 @@ typedef struct{
     char signer;
     int userID;
     char SHA1;
-    UInt32 MD5;
+    char MD5[32];
 }MessageProcessScanModule;
 
 typedef struct{
@@ -117,7 +115,7 @@ typedef struct{
     char name[64];
     int size;
     char SHA1;
-    UInt32 MD5;
+    char MD5[32];
     char sign;
     char signer;
 }MessageScanFile;

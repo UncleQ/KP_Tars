@@ -127,7 +127,6 @@ void* CProcessor::ProcessInterface(void * arg){
                             }else
                                 continue;//ok
                         }
-                        
                     }break;
                     default:break;
                 }

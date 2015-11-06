@@ -91,13 +91,17 @@ int CWhiteListManager::Init(const char * path, int nProcessorCnt){
     m_nProcessorCnt = nProcessorCnt;
     m_semID = semget(1, 1, 0666|IPC_CREAT);
     union semun sem_union;
-    sem_union.val = nProcessorCnt; if(semctl(m_semID, 0, SETVAL,sem_union) == -1){ //err
+    sem_union.val = nProcessorCnt; if(semctl(m_semID, 0, SETVAL, sem_union) == -1){ //err
         return 1;
     }
     return 0;
 }
 
-WHITELIST_RESULT CWhiteListManager::CheckMD5(UInt32 uiMD5){
+WHITELIST_RESULT CWhiteListManager::CheckMD5(char * cMD5){
+    return CheckMD5(std::string(cMD5));
+}
+
+WHITELIST_RESULT CWhiteListManager::CheckMD5(std::string strMD5){
     //check custom list first
     struct sembuf sem_b;
     sem_b.sem_num = 0;
@@ -108,7 +112,7 @@ WHITELIST_RESULT CWhiteListManager::CheckMD5(UInt32 uiMD5){
         return WHITELIST_ERR;
     }
 
-    HASH_MAP_MD5_ITERATOR pos = m_hashMapMD5Custom.find(uiMD5);
+    HASH_MAP_MD5_ITERATOR pos = m_hashMapMD5Custom.find(strMD5);
     if(pos != m_hashMapMD5Custom.end()){
         return (WHITELIST_RESULT)(pos->second);
     }
@@ -124,7 +128,7 @@ WHITELIST_RESULT CWhiteListManager::CheckMD5(UInt32 uiMD5){
     bool bWhite = false;
     for(int i=0;i<m_hashMapMD5Cnt;m_hashMapMD5Cnt++){
         HASH_MAP_MD5 * pCurHashMap = m_pHashMapMD5 + i;
-        pos = pCurHashMap->find(uiMD5);
+        pos = pCurHashMap->find(strMD5);
         if(pos != pCurHashMap->end()){
             if(pos->second == WHITELIST_GOOD)
                 bWhite = true;
@@ -153,11 +157,11 @@ int CWhiteListManager::UpdateCustomItem(HashInfo * pHashInfoBuff, int nBuffCnt){
     HASH_MAP_MD5_ITERATOR pos = m_hashMapMD5Custom.end();
     HashInfo * pCurHashInfo = pHashInfoBuff;
     for(int i=0;i<nBuffCnt;i++,pCurHashInfo++){
-        pos = m_hashMapMD5Custom.find(pCurHashInfo->uiKey);
+        pos = m_hashMapMD5Custom.find(pCurHashInfo->strKey);
         if(pos != m_hashMapMD5Custom.end()){
             pos->second = pCurHashInfo->value;
         }else{
-            m_hashMapMD5Custom.insert(std::pair< UInt32,WHITELIST_RESULT >(pCurHashInfo->uiKey, pCurHashInfo->value));
+            m_hashMapMD5Custom.insert(std::pair< std::string,WHITELIST_RESULT >(pCurHashInfo->strKey, pCurHashInfo->value));
         }
     }
     
@@ -181,7 +185,7 @@ int CWhiteListManager::AddCustomItem(HashInfo * pHashInfoBuff, int nBuffCnt){
     
     HashInfo * pCurHashInfo = pHashInfoBuff;
     for(int i=0;i<nBuffCnt;i++,pCurHashInfo++){
-        m_hashMapMD5Custom.insert(std::pair< UInt32,WHITELIST_RESULT >(pCurHashInfo->uiKey, pCurHashInfo->value));
+        m_hashMapMD5Custom.insert(std::pair< std::string,WHITELIST_RESULT >(pCurHashInfo->strKey, pCurHashInfo->value));
     }
     
     sem_b.sem_op = m_nProcessorCnt;
@@ -200,7 +204,7 @@ int CWhiteListManager::DeleteCustomItem(HashInfo * pHashInfoBuff, int nBuffCnt){
     
     HashInfo * pCurHashInfo = pHashInfoBuff;
     for(int i=0;i<nBuffCnt;i++,pCurHashInfo++){
-        m_hashMapMD5Custom.erase(m_hashMapMD5Custom.find(pCurHashInfo->uiKey));
+        m_hashMapMD5Custom.erase(m_hashMapMD5Custom.find(pCurHashInfo->strKey));
     }
     
     sem_b.sem_op = m_nProcessorCnt;
@@ -218,7 +222,6 @@ int CWhiteListManager::LoadWhitelistFile(const char * fileName, HASH_MAP_MD5 * p
     }
     
     WHITELIST_RESULT result = WHITELIST_UNKNOW;
-    UInt32 curMD5 = 0;
     char temp[READ_BUFFER_SIZE] = {0};
     char token[SHORT_BUFFER_SIZE] = {0};
     char checksum[LONG_BUFFER_SIZE] = {0};
@@ -232,8 +235,7 @@ int CWhiteListManager::LoadWhitelistFile(const char * fileName, HASH_MAP_MD5 * p
             case 'a': result = WHITELIST_BAD;break;
             default:break;
         }
-        curMD5 = strtoul(checksum,0,16);
-        pHashMap->insert(std::pair< UInt32,WHITELIST_RESULT >(curMD5, result));
+        pHashMap->insert(std::pair< std::string,WHITELIST_RESULT >(std::string(checksum + 2), result));
     }
     fclose(fp);
     return 0;
